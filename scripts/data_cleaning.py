@@ -11,826 +11,826 @@ transactions = pd.read_csv("data/raw/08_investor_transactions.csv")
 performance = pd.read_csv("data/raw/07_scheme_performance.csv")
 
 aum = pd.read_csv("data/raw/03_aum_by_fund_house.csv")
-# # Clean 02_nav_history.csv
+# Clean 02_nav_history.csv
 
-# # parse dates to datetime
-# nav["date"] = pd.to_datetime(nav["date"])
+# parse dates to datetime
+nav["date"] = pd.to_datetime(nav["date"])
 
-# # sort by amfi_code + date
-# nav = nav.sort_values(
-#     ["amfi_code","date"]
-# )
+# sort by amfi_code + date
+nav = nav.sort_values(
+    ["amfi_code","date"]
+)
 
-# # forward-fill missing NAV for holidays/weekends
-# nav["nav"] = nav.groupby(
-#     "amfi_code"
-# )["nav"].ffill()
+# forward-fill missing NAV for holidays/weekends
+nav["nav"] = nav.groupby(
+    "amfi_code"
+)["nav"].ffill()
 
-# # remove duplicates
-# nav = nav.drop_duplicates()
-# # validate NAV > 0
-# nav = nav[nav["nav"] > 0]
+# remove duplicates
+nav = nav.drop_duplicates()
+# validate NAV > 0
+nav = nav[nav["nav"] > 0]
 
 
-# # saved the result to a new file 
-# nav.to_csv(
-#     "data/processed/02_nav_history.csv",
-#     index=False
-# )
+# saved the result to a new file 
+nav.to_csv(
+    "data/processed/02_nav_history.csv",
+    index=False
+)
 
-# print("02_nav_history.csv saved successfully!")
+print("02_nav_history.csv saved successfully!")
 
-# print("Rows saved:", len(nav))
+print("Rows saved:", len(nav))
 
-# # result outcome 
-# print("Rows before cleaning:", len(pd.read_csv("data/raw/02_nav_history.csv")))
-# print("Rows after cleaning:", len(nav))
+# result outcome 
+print("Rows before cleaning:", len(pd.read_csv("data/raw/02_nav_history.csv")))
+print("Rows after cleaning:", len(nav))
 
-# # Clean 08_investor_transactions.csv
-# txn = pd.read_csv(
-#     "data/raw/08_investor_transactions.csv"
-# )
-# # standardise transaction_type values (SIP/Lumpsum/Redemption)
-# txn["transaction_type"] = (
-#     txn["transaction_type"]
-#     .str.strip()
-#     .str.lower()
-# )
+# Clean 08_investor_transactions.csv
+txn = pd.read_csv(
+    "data/raw/08_investor_transactions.csv"
+)
+# standardise transaction_type values (SIP/Lumpsum/Redemption)
+txn["transaction_type"] = (
+    txn["transaction_type"]
+    .str.strip()
+    .str.lower()
+)
 
-# # validate amount > 0, fix date formats
-# txn = txn[txn["amount_inr"] > 0]
+# validate amount > 0, fix date formats
+txn = txn[txn["amount_inr"] > 0]
 
-# # Fix Date
-# txn["transaction_date"] = pd.to_datetime(
-#     txn["transaction_date"]
-# )
+# Fix Date
+txn["transaction_date"] = pd.to_datetime(
+    txn["transaction_date"]
+)
 
-# # check KYC status enum values.
-# valid = [
-#     "Verified",
-#     "Pending",
-#     "Rejected"
-# ]
+# check KYC status enum values.
+valid = [
+    "Verified",
+    "Pending",
+    "Rejected"
+]
 
-# invalid = txn[
-#     ~txn["kyc_status"].isin(valid)
-# ]
-# print(invalid)
+invalid = txn[
+    ~txn["kyc_status"].isin(valid)
+]
+print(invalid)
 
-# # saved the result to a new file 
-# txn.to_csv(
-#     "data/processed/08_investor_transactions.csv",
-#     index=False
-# )
-# print("08_investor_transactions.csv saved successfully!")
+# saved the result to a new file 
+txn.to_csv(
+    "data/processed/08_investor_transactions.csv",
+    index=False
+)
+print("08_investor_transactions.csv saved successfully!")
 
-# # Clean 07_scheme_performance.csv
-# scheme = pd.read_csv(
-#     "data/raw/07_scheme_performance.csv"
-# )
-# # validate all return values are numeric
-# returns = [
-#     "return_1yr_pct",
-#     "return_3yr_pct",
-#     "return_5yr_pct"
-# ]
+# Clean 07_scheme_performance.csv
+scheme = pd.read_csv(
+    "data/raw/07_scheme_performance.csv"
+)
+# validate all return values are numeric
+returns = [
+    "return_1yr_pct",
+    "return_3yr_pct",
+    "return_5yr_pct"
+]
 
-# for col in returns:
+for col in returns:
 
-#     scheme[col] = pd.to_numeric(
-#         scheme[col],
-#         errors="coerce"
-#     )
-# # Flag Anomalies
-# anomaly = scheme[
-#     (scheme["return_1yr_pct"] > 100)
-#     |
-#     (scheme["return_1yr_pct"] < -100)
-# ]
-# print(anomaly)
+    scheme[col] = pd.to_numeric(
+        scheme[col],
+        errors="coerce"
+    )
+# Flag Anomalies
+anomaly = scheme[
+    (scheme["return_1yr_pct"] > 100)
+    |
+    (scheme["return_1yr_pct"] < -100)
+]
+print(anomaly)
 
-# # check expense_ratio range (0.1% – 2.5%).
-# invalid = scheme[
-#     (scheme["expense_ratio_pct"] < 0.1)
-#     |
-#     (scheme["expense_ratio_pct"] > 2.5)
-# ]
-# print(invalid)
+# check expense_ratio range (0.1% – 2.5%).
+invalid = scheme[
+    (scheme["expense_ratio_pct"] < 0.1)
+    |
+    (scheme["expense_ratio_pct"] > 2.5)
+]
+print(invalid)
 
-# print("Anomalies found:", len(anomaly))
-# print(anomaly)
+print("Anomalies found:", len(anomaly))
+print(anomaly)
 
-# print("Invalid expense ratios found:", len(invalid))
-# print(invalid)
+print("Invalid expense ratios found:", len(invalid))
+print(invalid)
 
-# # saved the result to a new file 
-# scheme.to_csv(
-#     "data/processed/07_scheme_performance.csv",
-#     index=False
-# )
-# print("07_scheme_performance.csv saved successfully!")
+# saved the result to a new file 
+scheme.to_csv(
+    "data/processed/07_scheme_performance.csv",
+    index=False
+)
+print("07_scheme_performance.csv saved successfully!")
 
 # Clean 03_aum_by_fund_house.csv
-# print(aum.head())
-# print(aum.info())
-# print(aum.isnull().sum())
+print(aum.head())
+print(aum.info())
+print(aum.isnull().sum())
 
-# # Convert Date
-# aum["date"] = pd.to_datetime(aum["date"])
-# print(aum.dtypes)
+# Convert Date
+aum["date"] = pd.to_datetime(aum["date"])
+print(aum.dtypes)
 
-# # Sort the Data
-# aum = aum.sort_values(
-#     by=["fund_house", "date"]
-# )
+# Sort the Data
+aum = aum.sort_values(
+    by=["fund_house", "date"]
+)
 
-# # Forward-fill missing AUM values for each fund house
-# aum["aum_crore"] = aum.groupby("fund_house")["aum_crore"].ffill()   
+# Forward-fill missing AUM values for each fund house
+aum["aum_crore"] = aum.groupby("fund_house")["aum_crore"].ffill()   
 
-# # Remove Duplicate Rows
-# duplicates = aum.duplicated().sum()
+# Remove Duplicate Rows
+duplicates = aum.duplicated().sum()
 
-# print("Duplicate rows:", duplicates)
+print("Duplicate rows:", duplicates)
 
-# aum = aum.drop_duplicates()
+aum = aum.drop_duplicates()
 
-# print(aum.isnull().sum())
-# aum["aum_crore"] = aum["aum_crore"].fillna(0)
-# aum["aum_lakh_crore"] = aum["aum_lakh_crore"].fillna(0)
+print(aum.isnull().sum())
+aum["aum_crore"] = aum["aum_crore"].fillna(0)
+aum["aum_lakh_crore"] = aum["aum_lakh_crore"].fillna(0)
 
-# # Save the Cleaned File
-# aum.to_csv(
-#     "data/processed/03_aum_by_fund_house.csv",
-#     index=False
-# )
-# print("03_aum_by_fund_house.csv saved successfully!")
+# Save the Cleaned File
+aum.to_csv(
+    "data/processed/03_aum_by_fund_house.csv",
+    index=False
+)
+print("03_aum_by_fund_house.csv saved successfully!")
 
-# category = pd.read_csv("data/raw/05_category_inflows.csv")
+category = pd.read_csv("data/raw/05_category_inflows.csv")
 
-# print("Dataset Loaded Successfully!\n")
+print("Dataset Loaded Successfully!\n")
 
-# # Display First 5 Rows
+# Display First 5 Rows
 
-# print(category.head())
+print(category.head())
 
-# # Display Dataset Information
+# Display Dataset Information
 
-# print("\nDataset Information\n")
+print("\nDataset Information\n")
 
-# print(category.info())
+print(category.info())
 
-# #  Check Missing Values
+#  Check Missing Values
 
-# print("\nMissing Values\n")
+print("\nMissing Values\n")
 
-# print(category.isnull().sum())
+print(category.isnull().sum())
 
-# # Convert Month Column to Datetime
+# Convert Month Column to Datetime
 
-# category["month"] = pd.to_datetime(category["month"])
+category["month"] = pd.to_datetime(category["month"])
 
-# # Remove Extra Spaces
+# Remove Extra Spaces
 
-# category["category"] = category["category"].str.strip()
+category["category"] = category["category"].str.strip()
 
-# # Standardize Category Names
-# category["category"] = category["category"].str.title()
+# Standardize Category Names
+category["category"] = category["category"].str.title()
 
-# # Sort Dataset
+# Sort Dataset
 
-# category = category.sort_values(
-#     by=["month", "category"]
-# )
+category = category.sort_values(
+    by=["month", "category"]
+)
 
-# # Remove Duplicate Rows
+# Remove Duplicate Rows
 
-# duplicates = category.duplicated().sum()
+duplicates = category.duplicated().sum()
 
-# print("\nDuplicate Rows :", duplicates)
+print("\nDuplicate Rows :", duplicates)
 
-# category = category.drop_duplicates()
+category = category.drop_duplicates()
 
-# # Convert Inflow Column to Numeric
+# Convert Inflow Column to Numeric
 
-# category["net_inflow_crore"] = pd.to_numeric(
-#     category["net_inflow_crore"],
-#     errors="coerce"
-# )
+category["net_inflow_crore"] = pd.to_numeric(
+    category["net_inflow_crore"],
+    errors="coerce"
+)
 
-# # Check Missing Values Again
+# Check Missing Values Again
 
-# print("\nMissing Values After Conversion\n")
+print("\nMissing Values After Conversion\n")
 
-# print(category.isnull().sum())
+print(category.isnull().sum())
 
-# # Remove Invalid Rows
+# Remove Invalid Rows
 
-# # If inflow is missing, remove that row
+# If inflow is missing, remove that row
 
-# category = category.dropna(subset=["net_inflow_crore"])
+category = category.dropna(subset=["net_inflow_crore"])
 
 
-# # Check for Extreme Values
+# Check for Extreme Values
 
-# print("\nTop 10 Highest Inflows\n")
+print("\nTop 10 Highest Inflows\n")
 
-# print(
-#     category.sort_values(
-#         "net_inflow_crore",
-#         ascending=False
-#     ).head(10)
-# )
+print(
+    category.sort_values(
+        "net_inflow_crore",
+        ascending=False
+    ).head(10)
+)
 
-# print("\nTop 10 Lowest Inflows\n")
+print("\nTop 10 Lowest Inflows\n")
 
-# print(
-#     category.sort_values(
-#         "net_inflow_crore",
-#         ascending=True
-#     ).head(10)
-# )
+print(
+    category.sort_values(
+        "net_inflow_crore",
+        ascending=True
+    ).head(10)
+)
 
-# print("\nFinal Shape")
+print("\nFinal Shape")
 
-# print(category.shape)
+print(category.shape)
 
-# # Save Clean Dataset
+# Save Clean Dataset
 
-# category.to_csv(
-#     "data/processed/05_category_inflows.csv",
-#     index=False
-# )
+category.to_csv(
+    "data/processed/05_category_inflows.csv",
+    index=False
+)
 
-# print("05_category_inflows.csv saved successfully!")
+print("05_category_inflows.csv saved successfully!")
 
 # Data Cleaning Script for 01_fund_master.csv
 # Load Dataset
 
-# fund = pd.read_csv("data/raw/01_fund_master.csv")
+fund = pd.read_csv("data/raw/01_fund_master.csv")
 
-# print("Dataset Loaded Successfully!\n")
+print("Dataset Loaded Successfully!\n")
 
-# # Display Dataset Information
+# Display Dataset Information
 
-# print(fund.head())
+print(fund.head())
 
-# print("\nDataset Information\n")
+print("\nDataset Information\n")
 
-# print(fund.info())
+print(fund.info())
 
-# # Check Missing Values
+# Check Missing Values
 
-# print("\nMissing Values\n")
+print("\nMissing Values\n")
 
-# print(fund.isnull().sum())
+print(fund.isnull().sum())
 
-# # Convert Launch Date to Datetime
+# Convert Launch Date to Datetime
 
-# fund["launch_date"] = pd.to_datetime(
-#     fund["launch_date"],
-#     errors="coerce"
-# )
+fund["launch_date"] = pd.to_datetime(
+    fund["launch_date"],
+    errors="coerce"
+)
 
-# # Remove Extra Spaces
+# Remove Extra Spaces
 
-# text_columns = [
+text_columns = [
 
-#     "fund_house",
+    "fund_house",
 
-#     "scheme_name",
+    "scheme_name",
 
-#     "category",
+    "category",
 
-#     "sub_category",
+    "sub_category",
 
-#     "plan",
+    "plan",
 
-#     "benchmark",
+    "benchmark",
 
-#     "fund_manager",
+    "fund_manager",
 
-#     "risk_category",
+    "risk_category",
 
-#     "sebi_category_code"
+    "sebi_category_code"
 
-# ]
+]
 
-# for col in text_columns:
+for col in text_columns:
 
-#     fund[col] = fund[col].str.strip()
+    fund[col] = fund[col].str.strip()
 
 
-# # Remove Duplicate Rows
+# Remove Duplicate Rows
 
-# duplicates = fund.duplicated().sum()
+duplicates = fund.duplicated().sum()
 
-# print("\nDuplicate Rows :", duplicates)
+print("\nDuplicate Rows :", duplicates)
 
-# fund = fund.drop_duplicates()
+fund = fund.drop_duplicates()
 
-# # Check Unique AMFI Codes
+# Check Unique AMFI Codes
 
-# duplicate_codes = fund["amfi_code"].duplicated().sum()
+duplicate_codes = fund["amfi_code"].duplicated().sum()
 
-# print("\nDuplicate AMFI Codes :", duplicate_codes)
+print("\nDuplicate AMFI Codes :", duplicate_codes)
 
-# # Convert Numeric Columns
+# Convert Numeric Columns
 
-# numeric_columns = [
+numeric_columns = [
 
-#     "expense_ratio_pct",
+    "expense_ratio_pct",
 
-#     "exit_load_pct",
+    "exit_load_pct",
 
-#     "min_sip_amount",
+    "min_sip_amount",
 
-#     "min_lumpsum_amount"
+    "min_lumpsum_amount"
 
-# ]
+]
 
-# for col in numeric_columns:
+for col in numeric_columns:
 
-#     fund[col] = pd.to_numeric(
-#         fund[col],
-#         errors="coerce"
-#     )
+    fund[col] = pd.to_numeric(
+        fund[col],
+        errors="coerce"
+    )
 
-# # Validate Expense Ratio
+# Validate Expense Ratio
 
-# # Valid range : 0.1% to 2.5%
+# Valid range : 0.1% to 2.5%
 
-# invalid_expense = fund[
-#     (fund["expense_ratio_pct"] < 0.1) |
-#     (fund["expense_ratio_pct"] > 2.5)
-# ]
+invalid_expense = fund[
+    (fund["expense_ratio_pct"] < 0.1) |
+    (fund["expense_ratio_pct"] > 2.5)
+]
 
-# print("\nInvalid Expense Ratio Rows")
+print("\nInvalid Expense Ratio Rows")
 
-# print(invalid_expense)
+print(invalid_expense)
 
-# # Validate Exit Load
+# Validate Exit Load
 
-# # Exit load cannot be negative
+# Exit load cannot be negative
 
-# fund = fund[fund["exit_load_pct"] >= 0]
+fund = fund[fund["exit_load_pct"] >= 0]
 
-# # Validate Minimum Investment Amounts
+# Validate Minimum Investment Amounts
 
-# fund = fund[fund["min_sip_amount"] > 0]
+fund = fund[fund["min_sip_amount"] > 0]
 
-# fund = fund[fund["min_lumpsum_amount"] > 0]
+fund = fund[fund["min_lumpsum_amount"] > 0]
 
-# # Standardize Risk Category
+# Standardize Risk Category
 
-# fund["risk_category"] = fund["risk_category"].str.title()
+fund["risk_category"] = fund["risk_category"].str.title()
 
-# valid_risk = [
+valid_risk = [
 
-#     "Low",
+    "Low",
 
-#     "Moderate",
+    "Moderate",
 
-#     "Moderately High",
+    "Moderately High",
 
-#     "High",
+    "High",
 
-#     "Very High"
+    "Very High"
 
-# ]
+]
 
-# invalid_risk = fund[
-#     ~fund["risk_category"].isin(valid_risk)
-# ]
+invalid_risk = fund[
+    ~fund["risk_category"].isin(valid_risk)
+]
 
-# print("\nInvalid Risk Categories")
+print("\nInvalid Risk Categories")
 
-# print(invalid_risk)
+print(invalid_risk)
 
-# #  Sort Dataset
+#  Sort Dataset
 
-# fund = fund.sort_values(
-#     by=["fund_house", "scheme_name"]
-# )
+fund = fund.sort_values(
+    by=["fund_house", "scheme_name"]
+)
 
-# # Final Dataset Shape
+# Final Dataset Shape
 
-# print("\nFinal Shape")
+print("\nFinal Shape")
 
-# print(fund.shape)
+print(fund.shape)
 
-# #  Save Clean Dataset
+#  Save Clean Dataset
 
-# fund.to_csv(
-#     "data/processed/01_fund_master.csv",
-#     index=False
-# )
-# print("01_fund_master.csv saved successfully!")
+fund.to_csv(
+    "data/processed/01_fund_master.csv",
+    index=False
+)
+print("01_fund_master.csv saved successfully!")
 
 # Data Cleaning Script for 06_industry_folio_count.csv
 # Load Dataset
 
-# folio_count = pd.read_csv("data/raw/06_industry_folio_count.csv")
+folio_count = pd.read_csv("data/raw/06_industry_folio_count.csv")
 
-# print("Dataset Loaded Successfully!\n")
+print("Dataset Loaded Successfully!\n")
 
 
-# # Display First Five Rows
+# Display First Five Rows
 
-# print(folio_count.head())
+print(folio_count.head())
 
-# # Display Dataset Information
+# Display Dataset Information
 
-# print("\nDataset Information\n")
+print("\nDataset Information\n")
 
-# print(folio_count.info())
+print(folio_count.info())
 
-# # Check Missing Values
+# Check Missing Values
 
-# print("\nMissing Values\n")
+print("\nMissing Values\n")
 
-# print(folio_count.isnull().sum())
+print(folio_count.isnull().sum())
 
-# # Convert Month to Datetime
+# Convert Month to Datetime
 
-# folio_count["month"] = pd.to_datetime(
-#     folio_count["month"],
-#     errors="coerce"
-# )
+folio_count["month"] = pd.to_datetime(
+    folio_count["month"],
+    errors="coerce"
+)
 
-# # Sort Dataset by Month
+# Sort Dataset by Month
 
-# folio_count = folio_count.sort_values("month")
+folio_count = folio_count.sort_values("month")
 
-# # Remove Duplicate Rows
+# Remove Duplicate Rows
 
-# duplicates = folio_count.duplicated().sum()
+duplicates = folio_count.duplicated().sum()
 
-# print("\nDuplicate Rows :", duplicates)
+print("\nDuplicate Rows :", duplicates)
 
-# folio_count = folio_count.drop_duplicates()
+folio_count = folio_count.drop_duplicates()
 
-# # Convert Numeric Columns
+# Convert Numeric Columns
 
-# numeric_columns = [
+numeric_columns = [
 
-#     "total_folios_crore",
+    "total_folios_crore",
 
-#     "equity_folios_crore",
+    "equity_folios_crore",
 
-#     "debt_folios_crore",
+    "debt_folios_crore",
 
-#     "hybrid_folios_crore",
+    "hybrid_folios_crore",
 
-#     "others_folios_crore"
+    "others_folios_crore"
 
-# ]
+]
 
-# for col in numeric_columns:
+for col in numeric_columns:
 
-#     folio_count[col] = pd.to_numeric(
-#         folio_count[col],
-#         errors="coerce"
-#     )
+    folio_count[col] = pd.to_numeric(
+        folio_count[col],
+        errors="coerce"
+    )
 
-# # Check Missing Values Again
+# Check Missing Values Again
 
-# print("\nMissing Values After Conversion\n")
+print("\nMissing Values After Conversion\n")
 
-# print(folio_count.isnull().sum())
+print(folio_count.isnull().sum())
 
-# # Remove Rows with Missing Values
+# Remove Rows with Missing Values
 
-# folio_count = folio_count.dropna()
+folio_count = folio_count.dropna()
 
-# # Validate Folio Counts
+# Validate Folio Counts
 
-# # Folio counts should never be negative
+# Folio counts should never be negative
 
-# for col in numeric_columns:
+for col in numeric_columns:
 
-#     folio_count = folio_count[folio_count[col] >= 0]
+    folio_count = folio_count[folio_count[col] >= 0]
 
-# # Verify Total Folios
+# Verify Total Folios
 
-# # The total folios should generally be greater than or equal to
-# # the sum of the category-wise folios.
+# The total folios should generally be greater than or equal to
+# the sum of the category-wise folios.
 
-# folio_count["category_total"] = (
+folio_count["category_total"] = (
 
-#     folio_count["equity_folios_crore"]
+    folio_count["equity_folios_crore"]
 
-#     + folio_count["debt_folios_crore"]
+    + folio_count["debt_folios_crore"]
 
-#     + folio_count["hybrid_folios_crore"]
+    + folio_count["hybrid_folios_crore"]
 
-#     + folio_count["others_folios_crore"]
+    + folio_count["others_folios_crore"]
 
-# )
+)
 
-# # Display rows where the difference is more than 0.05 crore
+# Display rows where the difference is more than 0.05 crore
 
-# difference = abs(folio_count["total_folios_crore"] - folio_count["category_total"])
+difference = abs(folio_count["total_folios_crore"] - folio_count["category_total"])
 
-# anomalies = folio_count[difference > 0.05]
+anomalies = folio_count[difference > 0.05]
 
-# print("\nPossible Anomalies")
+print("\nPossible Anomalies")
 
-# print(anomalies)
+print(anomalies)
 
-# # Remove helper column
+# Remove helper column
 
-# folio_count.drop(columns=["category_total"], inplace=True)
+folio_count.drop(columns=["category_total"], inplace=True)
 
-# #  Display Highest Folio Counts
+#  Display Highest Folio Counts
 
-# print("\nTop 5 Total Folio Counts")
+print("\nTop 5 Total Folio Counts")
 
-# print(
+print(
 
-#     folio_count.sort_values(
+    folio_count.sort_values(
 
-#         "total_folios_crore",
+        "total_folios_crore",
 
-#         ascending=False
+        ascending=False
 
-#     ).head()
+    ).head()
 
-# )
+)
 
-# # Final Dataset Shape
+# Final Dataset Shape
 
-# print("\nFinal Dataset Shape")
+print("\nFinal Dataset Shape")
 
-# print(folio_count.shape)
+print(folio_count.shape)
 
-# # Save Clean Dataset
+# Save Clean Dataset
 
-# folio_count.to_csv(
+folio_count.to_csv(
 
-#     "data/processed/06_industry_folio_count.csv",
+    "data/processed/06_industry_folio_count.csv",
 
-#     index=False
+    index=False
 
-# )
+)
 
-# print("06_industry_folio_count.csv saved successfully!")
+print("06_industry_folio_count.csv saved successfully!")
 
-# # Data Cleaning Script for 04_monthly_sip_inflows.csv
-# # Load CSV
-# sip= pd.read_csv("data/raw/04_monthly_sip_inflows.csv")
-# print("Dataset Loaded Successfully\n")
+# Data Cleaning Script for 04_monthly_sip_inflows.csv
+# Load CSV
+sip= pd.read_csv("data/raw/04_monthly_sip_inflows.csv")
+print("Dataset Loaded Successfully\n")
 
-# # Display Basic Information
+# Display Basic Information
 
-# print(sip.head())
+print(sip.head())
 
-# print("\nDataset Information\n")
+print("\nDataset Information\n")
 
-# print(sip.info())
+print(sip.info())
 
-# # Check Missing Values
+# Check Missing Values
 
-# print("\nMissing Values\n")
+print("\nMissing Values\n")
 
-# print(sip.isnull().sum())
+print(sip.isnull().sum())
 
-# # Convert Month Column
+# Convert Month Column
 
-# # Convert text into datetime
+# Convert text into datetime
 
-# sip["month"] = pd.to_datetime(sip["month"])
+sip["month"] = pd.to_datetime(sip["month"])
 
-# # Sort Dataset
+# Sort Dataset
 
-# sip = sip.sort_values("month")
+sip = sip.sort_values("month")
 
-# # Remove Duplicate Rows
+# Remove Duplicate Rows
 
-# duplicates = sip.duplicated().sum()
+duplicates = sip.duplicated().sum()
 
-# print("\nDuplicate Rows :", duplicates)
+print("\nDuplicate Rows :", duplicates)
 
-# sip = sip.drop_duplicates()
+sip = sip.drop_duplicates()
 
-# # Convert Numeric Columns
+# Convert Numeric Columns
 
-# numeric_columns = [
+numeric_columns = [
 
-#     "sip_inflow_crore",
+    "sip_inflow_crore",
 
-#     "active_sip_accounts_crore",
+    "active_sip_accounts_crore",
 
-#     "new_sip_accounts_lakh",
+    "new_sip_accounts_lakh",
 
-#     "sip_aum_lakh_crore",
+    "sip_aum_lakh_crore",
 
-#     "yoy_growth_pct"
+    "yoy_growth_pct"
 
-# ]
+]
 
-# for col in numeric_columns:
+for col in numeric_columns:
 
-#     sip[col] = pd.to_numeric(
-#         sip[col],
+    sip[col] = pd.to_numeric(
+        sip[col],
 
-#         errors="coerce"
+        errors="coerce"
 
-#     )
+    )
 
-# # Handle Missing Values
+# Handle Missing Values
 
-# # YoY Growth can be blank for the first year.
-# # Replace missing values with 0.
+# YoY Growth can be blank for the first year.
+# Replace missing values with 0.
 
-# sip["yoy_growth_pct"] = sip["yoy_growth_pct"].fillna(0)
+sip["yoy_growth_pct"] = sip["yoy_growth_pct"].fillna(0)
 
-# # Validate Values
+# Validate Values
 
-# # SIP Inflow should never be negative
+# SIP Inflow should never be negative
 
-# sip = sip[sip["sip_inflow_crore"] >= 0]
+sip = sip[sip["sip_inflow_crore"] >= 0]
 
-# # Active SIP Accounts
+# Active SIP Accounts
 
-# sip = sip[sip["active_sip_accounts_crore"] >= 0]
+sip = sip[sip["active_sip_accounts_crore"] >= 0]
 
-# # New SIP Accounts
+# New SIP Accounts
 
-# sip = sip[sip["new_sip_accounts_lakh"] >= 0]
+sip = sip[sip["new_sip_accounts_lakh"] >= 0]
 
-# # SIP AUM
+# SIP AUM
 
-# sip = sip[sip["sip_aum_lakh_crore"] >= 0]
+sip = sip[sip["sip_aum_lakh_crore"] >= 0]
 
-# # Check Outliers
+# Check Outliers
 
-# print("\nLargest SIP Inflows\n")
+print("\nLargest SIP Inflows\n")
 
-# print(
+print(
 
-#     sip.sort_values(
+    sip.sort_values(
 
-#         "sip_inflow_crore",
+        "sip_inflow_crore",
 
-#         ascending=False
+        ascending=False
 
-#     ).head()
+    ).head()
 
-# )
+)
 
-# # Final Dataset Info
+# Final Dataset Info
 
-# print("\nFinal Dataset Shape")
+print("\nFinal Dataset Shape")
 
-# print(sip.shape)
+print(sip.shape)
 
-# # Save Clean Dataset
+# Save Clean Dataset
 
-# sip.to_csv(
+sip.to_csv(
 
-#     "data/processed/04_monthly_sip_inflows.csv",
+    "data/processed/04_monthly_sip_inflows.csv",
 
-#     index=False
+    index=False
 
-# )
+)
 
-# print("04_monthly_sip_inflows.csv saved successfully!")
+print("04_monthly_sip_inflows.csv saved successfully!")
 
 
-# # Data Cleaning Script for 09_portfolio_holdings.csv
-# # Load Dataset
-# portfolio = pd.read_csv("data/raw/09_portfolio_holdings.csv")
+# Data Cleaning Script for 09_portfolio_holdings.csv
+# Load Dataset
+portfolio = pd.read_csv("data/raw/09_portfolio_holdings.csv")
 
-# print("Dataset Loaded Successfully!\n")
+print("Dataset Loaded Successfully!\n")
 
-# # Display Dataset Information
+# Display Dataset Information
 
-# print(portfolio.head())
+print(portfolio.head())
 
-# print("\nDataset Information\n")
+print("\nDataset Information\n")
 
-# print(portfolio.info())
+print(portfolio.info())
 
-# # Check Missing Values
+# Check Missing Values
 
-# print("\nMissing Values\n")
+print("\nMissing Values\n")
 
-# print(portfolio.isnull().sum())
+print(portfolio.isnull().sum())
 
-# # Convert Portfolio Date
+# Convert Portfolio Date
 
-# portfolio["portfolio_date"] = pd.to_datetime(
-#     portfolio["portfolio_date"],
-#     errors="coerce"
-# )
+portfolio["portfolio_date"] = pd.to_datetime(
+    portfolio["portfolio_date"],
+    errors="coerce"
+)
 
-# # Remove Extra Spaces
+# Remove Extra Spaces
 
-# text_columns = [
+text_columns = [
 
-#     "stock_symbol",
+    "stock_symbol",
 
-#     "stock_name",
+    "stock_name",
 
-#     "sector"
+    "sector"
 
-# ]
+]
 
-# for col in text_columns:
+for col in text_columns:
 
-#     portfolio[col] = portfolio[col].str.strip()
+    portfolio[col] = portfolio[col].str.strip()
 
-# # Remove Duplicate Rows
+# Remove Duplicate Rows
 
-# duplicates = portfolio.duplicated().sum()
+duplicates = portfolio.duplicated().sum()
 
-# print("\nDuplicate Rows :", duplicates)
+print("\nDuplicate Rows :", duplicates)
 
-# portfolio = portfolio.drop_duplicates()
+portfolio = portfolio.drop_duplicates()
 
-# # Convert Numeric Columns
+# Convert Numeric Columns
 
-# numeric_columns = [
+numeric_columns = [
 
-#     "weight_pct",
+    "weight_pct",
 
-#     "market_value_cr",
+    "market_value_cr",
 
-#     "current_price_inr"
+    "current_price_inr"
 
-# ]
+]
 
-# for col in numeric_columns:
+for col in numeric_columns:
 
-#     portfolio[col] = pd.to_numeric(
-#         portfolio[col],
-#         errors="coerce"
-#     )
+    portfolio[col] = pd.to_numeric(
+        portfolio[col],
+        errors="coerce"
+    )
 
-# # Remove Missing Values
+# Remove Missing Values
 
-# portfolio = portfolio.dropna()
+portfolio = portfolio.dropna()
 
-# # Validate Weight Percentage
-# # Weight must be between 0 and 100
+# Validate Weight Percentage
+# Weight must be between 0 and 100
 
-# invalid_weight = portfolio[
-#     (portfolio["weight_pct"] < 0) |
-#     (portfolio["weight_pct"] > 100)
-# ]
+invalid_weight = portfolio[
+    (portfolio["weight_pct"] < 0) |
+    (portfolio["weight_pct"] > 100)
+]
 
-# print("\nInvalid Weight Percentage")
+print("\nInvalid Weight Percentage")
 
-# print(invalid_weight)
+print(invalid_weight)
 
-# # Keep only valid records
+# Keep only valid records
 
-# portfolio = portfolio[
-#     (portfolio["weight_pct"] >= 0) &
-#     (portfolio["weight_pct"] <= 100)
-# ]
+portfolio = portfolio[
+    (portfolio["weight_pct"] >= 0) &
+    (portfolio["weight_pct"] <= 100)
+]
 
-# # Validate Market Value
+# Validate Market Value
 
-# portfolio = portfolio[portfolio["market_value_cr"] > 0]
+portfolio = portfolio[portfolio["market_value_cr"] > 0]
 
-# # Validate Current Price
+# Validate Current Price
 
-# portfolio = portfolio[portfolio["current_price_inr"] > 0]
+portfolio = portfolio[portfolio["current_price_inr"] > 0]
 
-# # Sort Dataset
-# portfolio = portfolio.sort_values(
-#     by=["amfi_code", "portfolio_date", "weight_pct"],
-#     ascending=[True, True, False]
-# )
+# Sort Dataset
+portfolio = portfolio.sort_values(
+    by=["amfi_code", "portfolio_date", "weight_pct"],
+    ascending=[True, True, False]
+)
 
-# # Display Top Holdings
+# Display Top Holdings
 
-# print("\nTop Holdings by Weight\n")
+print("\nTop Holdings by Weight\n")
 
-# print(
-#     portfolio[
-#         ["stock_name", "weight_pct"]
-#     ].sort_values(
-#         "weight_pct",
-#         ascending=False
-#     ).head(10)
-# )
+print(
+    portfolio[
+        ["stock_name", "weight_pct"]
+    ].sort_values(
+        "weight_pct",
+        ascending=False
+    ).head(10)
+)
 
-# #  Final Dataset Shape
+#  Final Dataset Shape
 
-# print("\nFinal Dataset Shape")
+print("\nFinal Dataset Shape")
 
-# print(portfolio.shape)
+print(portfolio.shape)
 
-# #  Save Clean Dataset
+#  Save Clean Dataset
 
-# portfolio.to_csv(
-#     "data/processed/09_portfolio_holdings.csv",
-#     index=False
-# )
+portfolio.to_csv(
+    "data/processed/09_portfolio_holdings.csv",
+    index=False
+)
 
-# print("09_portfolio_holdings.csv saved successfully!")
+print("09_portfolio_holdings.csv saved successfully!")
 
 # Data Cleaning Script for 10_benchmarks_indices.csv
 # Load Dataset
